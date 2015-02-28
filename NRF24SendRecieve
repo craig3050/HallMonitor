@@ -1,0 +1,68 @@
+#include <RF24Network.h>
+#include <RF24.h>
+#include <SPI.h>
+
+// nRF24L01(+) radio attached to SPI and pins 8 & 9
+RF24 radio(9,10);
+
+// Network uses that radio
+RF24Network network(radio);
+
+// Address of our node
+const uint16_t this_node = 0;
+
+// Address of the other node
+const uint16_t other_node = 1;
+
+void setup(void)
+{
+  Serial.begin(57600);
+  Serial.println("SendRecieve");
+  Serial.println("Enter text to send to other device"); 
+ 
+  SPI.begin();
+  radio.begin();
+  network.begin(/*channel*/ 90, /*node address*/ this_node);
+}
+
+  
+
+void loop(void)
+{
+//RECIEVE TEXT FROM NETWORK
+// Pump the network regularly
+  network.update();
+
+  // Is there anything ready for us?
+  while ( network.available() )
+  {
+    // If so, grab it and print it out
+    RF24NetworkHeader header;
+    static char message[32];
+    network.read(header,message,sizeof(message));
+    Serial.print("Received: ");
+    Serial.println(message);
+    memset(&message[0], 0, sizeof(message));
+  }
+  
+//RECIEVE TEXT FROM SERIAL  
+  
+  // while loop for any data on serial 
+  while ( Serial.available() )
+    {
+      String messageSend = Serial.readStringUntil('\n');
+    
+    //Convert String into Char Array for sending // 
+    char outMessage[32];
+    // Copy it over 
+    messageSend.toCharArray(outMessage, 32);
+    
+    RF24NetworkHeader header(/*to node*/ other_node);
+    bool ok = network.write(header,outMessage,strlen(outMessage));  
+    
+    //clean up the memory
+    messageSend = "";
+    memset(&outMessage[0], 0, sizeof(outMessage));
+    }  
+  
+}
