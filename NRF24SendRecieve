@@ -69,15 +69,8 @@ void SendData(String self)
   bool ok = network.write(header,outMessage,strlen(outMessage));  
 }
 
-//String StartMessage(String self)
-//{
-//  String spacers = "---------";
-//  String message = "---------";
-//  message += self;
-//  message += spacers;
-//  return message;
-//}  
-
+//All transmitted data should go through datawrapper for correct formatting
+//Note - the cross reference to sending should be removed for modularisation - next commit...
 void DataWrapper(String self)
 {
   //Lead with the device code
