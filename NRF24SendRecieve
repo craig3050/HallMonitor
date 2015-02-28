@@ -3,7 +3,7 @@
 #include <SPI.h>
 
 //Insert Device ID##
-String DeviceID = "0000001";
+String DeviceID = "001 ";
 
 // nRF24L01(+) radio attached to SPI and pins 8 & 9
 RF24 radio(9,10);
@@ -69,28 +69,33 @@ void SendData(String self)
   bool ok = network.write(header,outMessage,strlen(outMessage));  
 }
 
-String StartMessage(String self)
-{
-  String spacers = "-----";
-  String message = "-----";
-  message += self;
-  message += spacers;
-  return message;
-}  
+//String StartMessage(String self)
+//{
+//  String spacers = "---------";
+//  String message = "---------";
+//  message += self;
+//  message += spacers;
+//  return message;
+//}  
 
 void DataWrapper(String self)
 {
-  //Send the Device ID Code
-  SendData(StartMessage(DeviceID));
-  //Send data
-  int selfSize = sizeof(self);
+  //Lead with the device code
+  String transmitData = DeviceID;
+  
+  //append the message
+  transmitData += self;
+  
+  //check the size of outgoing message
+  //if less than full 32 bytes add some whitespace
+  int selfSize = sizeof(transmitData);
   if (selfSize < 32)
   {
-   self += "                             ";
+   transmitData += "                             ";
   } 
-  SendData(self);
-  //Send Ending message
-  SendData(StartMessage("--END--"));
+  
+  //Send the Device ID Code + Data
+  SendData(transmitData);
 }
   
 void loop(void)
